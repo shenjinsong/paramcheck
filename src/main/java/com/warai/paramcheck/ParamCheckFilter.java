@@ -7,10 +7,6 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
-/**
- * @auther: 大叔
- * @Time: 2020/4/17 15:29
- */
 @Configuration
 public class ParamCheckFilter implements Filter {
 
