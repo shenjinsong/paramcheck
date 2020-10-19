@@ -112,7 +112,7 @@ public class ParamCheckIntercept extends HandlerInterceptorAdapter {
 
         // 链接中包含参数，和请求体中参数校验过程
         if (isRequestBody) {
-            jsonObject = this.getReqBodyParams(request);
+            jsonObject = this.parseReqBodyParams(request);
         } else {
             String jsonStr = JSON.toJSONString(request.getParameterMap());
             jsonObject = JSON.parseObject(jsonStr);
@@ -123,7 +123,7 @@ public class ParamCheckIntercept extends HandlerInterceptorAdapter {
     }
 
 
-    private JSONObject getReqBodyParams(ServletRequest servletRequest) {
+    private JSONObject parseReqBodyParams(ServletRequest servletRequest) {
 
 
         try (InputStreamReader inputStreamReader = new InputStreamReader(servletRequest.getInputStream(), StandardCharsets.UTF_8)) {
