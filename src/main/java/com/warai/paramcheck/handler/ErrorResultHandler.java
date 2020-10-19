@@ -1,27 +1,27 @@
-package com.warai.paramcheck.configurer;
+package com.warai.paramcheck.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.warai.paramcheck.annotation.ParamCheck;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * @Auther: わらい
  * @Time: 2020/9/22 16:26
  */
-public abstract class ErrorResultHandlerConfigurer {
+//@Service
+public class ErrorResultHandler {
 
-    @Resource
-    private HttpServletResponse response;
-
-    public void handler(String param, ParamCheck paramCheck) throws IOException {
+    public void handler(List<String> badFields, ParamCheck paramCheck) throws IOException {
         Map<String, Object> map = new HashMap<>(1);
         map.put("code", paramCheck.errorCode());
         map.put("msg", paramCheck.msg());
@@ -43,13 +43,20 @@ public abstract class ErrorResultHandlerConfigurer {
         }
 
         void build() throws IOException {
-            response.setStatus(status.value());
-            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-            PrintWriter out = response.getWriter();
-            String json = JSON.toJSONString(msg);
-            out.write(json);
-            out.flush();
-            out.close();
+            ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (requestAttributes != null){
+                HttpServletResponse response = requestAttributes.getResponse();
+                if (response != null){
+                    response.setStatus(status.value());
+                    response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+                    PrintWriter out = response.getWriter();
+                    String json = JSON.toJSONString(msg);
+                    out.write(json);
+                    out.flush();
+                    out.close();
+                }
+            }
+
         }
     }
 }

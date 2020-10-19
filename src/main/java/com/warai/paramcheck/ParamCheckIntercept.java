@@ -1,10 +1,10 @@
 package com.warai.paramcheck;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.warai.paramcheck.annotation.ParamCheck;
-import com.warai.paramcheck.configurer.ErrorResultHandlerConfigurer;
+import com.warai.paramcheck.handler.ErrorResultHandler;
+import com.warai.paramcheck.util.FieldCheck;
 import com.warai.paramcheck.util.SpringContextUtil;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.util.ObjectUtils;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-
+import javax.management.BadStringOperationException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,10 +21,7 @@ import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -36,23 +33,17 @@ import java.util.stream.Collectors;
 public class ParamCheckIntercept extends HandlerInterceptorAdapter {
 
     private static Logger log = Logger.getLogger(ParamCheckIntercept.class.getName());
+    private static ErrorResultHandler errorResultHandler;
 
-    private static Pattern ERROR_VALUE = Pattern.compile("null|undefined");
-
-    private static String OPR_EXPS = "[<>\\-=|]";
-
-    private static Pattern OPR = Pattern.compile(OPR_EXPS);
-
-    private static final ThreadLocal<String> threadLocal = new ThreadLocal<>();
-
-    private static ErrorResultHandlerConfigurer errorResultHandler;
 
     static {
         try {
-            errorResultHandler = SpringContextUtil.getBean(ErrorResultHandlerConfigurer.class);
-            log.info("*** Initialize the ErrorResultHandler processor ***");
-        } catch (Exception e) {
-            throw new NoSuchBeanDefinitionException("ParamCheck lacks the error result handling implementation class and needs to implement the ErrorResultHandler interface");
+            errorResultHandler = SpringContextUtil.getBean(ErrorResultHandler.class);
+            String name = errorResultHandler.getClass().getName();
+            log.info("*** Initialize the " + name + " processor ***");
+        } catch (NoSuchBeanDefinitionException ignore) {
+            errorResultHandler = new ErrorResultHandler();
+            log.info("*** Initialize the default ErrorResultHandler processor ***");
         }
     }
 
@@ -91,33 +82,34 @@ public class ParamCheckIntercept extends HandlerInterceptorAdapter {
         ServletRequest servletRequest = new RequestReaderHttpServletRequestWrapper(request);
 
         // 检查参数
-        boolean checkSuccess = this.checkReqParams(paramCheck, servletRequest, isRequestBody);
-        if (!checkSuccess) {
-            errorResultHandler.handler(threadLocal.get(), paramCheck);
-            threadLocal.remove();
+        FieldCheck fieldCheck = this.checkReqParams(paramCheck, servletRequest, isRequestBody);
+        if (fieldCheck.isInvalid()) {
+            errorResultHandler.handler(fieldCheck.getBadFields(), paramCheck);
             return false;
         }
         return true;
     }
 
 
-    private boolean checkReqParams(ParamCheck paramCheck, ServletRequest request, boolean isRequestBody) {
+    private FieldCheck checkReqParams(ParamCheck paramCheck, ServletRequest request, boolean isRequestBody) throws BadStringOperationException {
+
+        JSONObject jsonObject;
 
         // 链接中包含参数，和请求体中参数校验过程
         if (isRequestBody) {
-            return this.checkReqBodyParams(paramCheck, request);
+            jsonObject = this.getReqBodyParams(request);
         } else {
             String jsonStr = JSON.toJSONString(request.getParameterMap());
-            threadLocal.set(jsonStr);
-            JSONObject jsonObject = JSON.parseObject(jsonStr);
-            return checkParam(paramCheck, jsonObject);
+            jsonObject = JSON.parseObject(jsonStr);
         }
+        FieldCheck fieldCheck = new FieldCheck(paramCheck, jsonObject);
+        fieldCheck.checkParam();
+        return fieldCheck;
     }
 
 
-    private boolean checkReqBodyParams(ParamCheck paramCheck, ServletRequest servletRequest) {
+    private JSONObject getReqBodyParams(ServletRequest servletRequest){
 
-        JSONObject jsonObject = null;
 
         try (InputStreamReader inputStreamReader = new InputStreamReader(servletRequest.getInputStream(), StandardCharsets.UTF_8)) {
 
@@ -125,89 +117,13 @@ public class ParamCheckIntercept extends HandlerInterceptorAdapter {
 
             // 将请求中的请求体通过流读成字符
             String jsonStr = bufferedReader.lines().collect(Collectors.joining());
-            // 将参数放到线程变量中。后面记录参数值需要
-            threadLocal.set(jsonStr);
             // 传入的json数据序列化为Json对象
-            jsonObject = JSONObject.parseObject(jsonStr);
+            return JSONObject.parseObject(jsonStr);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        if (jsonObject == null) {
-            return false;
-        }
-
-        return checkParam(paramCheck, jsonObject);
-    }
-
-
-    private boolean checkParam(ParamCheck paramCheck, JSONObject jsonObject) {
-        for (String checkStr : paramCheck.value()) {
-            if (invalid(OPR.matcher(checkStr).find(), checkStr, jsonObject)) {
-                log.warning("*** Bad field : " + checkStr + " ***");
-                return false;
-            }
-        }
-        return true;
-    }
-
-
-    private boolean invalid(boolean containOpr, String checkStr, JSONObject param) {
-        // 包含运算符做特殊检验
-        checkStr = checkStr.replaceAll(" ", "");
-        if (containOpr) {
-            String[] checkStrs = checkStr.split(OPR_EXPS);
-            if (checkStr.contains("|")) {
-                return Arrays.stream(checkStrs).allMatch(str -> containErrorValue(param.get(str), null));
-
-            } else if (checkStr.contains("-")) {
-                String[] val = checkStr.split("-");
-                String field = val[0];
-                Integer length = null;
-                try {
-                    length = Integer.valueOf(val[1]);
-                } catch (Exception e) {
-                    log.warning("*** @ParamCheck Incorrect use of restricted characters, Check invalid [" + checkStr + "] ***");
-                }
-
-                Object o = param.get(field);
-
-                if (o instanceof JSONArray) {
-                    JSONArray o1 = (JSONArray) o;
-                    // 数组时逐个判断
-                    Integer finalLength = length;
-                    return o1.stream().anyMatch(o2 -> containErrorValue(o2, finalLength));
-                } else {
-                    return containErrorValue(param.getString(field), length);
-                }
-
-            }
-            return true;
-
-        } else {
-            return containErrorValue(param.get(checkStr), null);
+        } catch (Exception ignore) {
+            return null;
         }
     }
 
-    private static boolean containErrorValue(Object obj, Integer length) {
-        if (ObjectUtils.isEmpty(obj)) {
-            log.warning("*** Bad parameter: " + JSON.toJSONString(obj) + (length == null ? "" : ", length : " + length) + " ***");
-            return true;
-        } else if (obj instanceof JSONArray) {
-            JSONArray jsonArray = (JSONArray) obj;
-            for (Object o : jsonArray) {
-                if (containErrorValue(o, length)) {
-                    return true;
-                }
-            }
-        }
-
-        if (ERROR_VALUE.matcher(JSON.toJSONString(obj).toLowerCase()).find()) {
-            return true;
-        }
-
-        return length != null && obj.toString().length() > length;
-    }
 
 }
