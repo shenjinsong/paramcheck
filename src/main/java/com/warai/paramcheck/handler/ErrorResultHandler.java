@@ -18,7 +18,6 @@ import java.util.Map;
  * @Auther: わらい
  * @Time: 2020/9/22 16:26
  */
-//@Service
 public class ErrorResultHandler {
 
     public void handler(List<String> badFields, ParamCheck paramCheck) throws IOException {

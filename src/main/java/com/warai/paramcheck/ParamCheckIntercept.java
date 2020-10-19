@@ -5,8 +5,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.warai.paramcheck.annotation.ParamCheck;
 import com.warai.paramcheck.handler.ErrorResultHandler;
 import com.warai.paramcheck.util.FieldCheck;
-import com.warai.paramcheck.util.SpringContextUtil;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.reflections.Reflections;
+import org.reflections.util.ConfigurationBuilder;
+import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.method.HandlerMethod;
@@ -21,6 +22,7 @@ import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -37,14 +39,27 @@ public class ParamCheckIntercept extends HandlerInterceptorAdapter {
 
 
     static {
-        try {
-            errorResultHandler = SpringContextUtil.getBean(ErrorResultHandler.class);
-            String name = errorResultHandler.getClass().getName();
-            log.info("*** Initialize the " + name + " processor ***");
-        } catch (NoSuchBeanDefinitionException ignore) {
+
+        Reflections reflections = new Reflections(new ConfigurationBuilder().forPackages(""));
+        Set<Class<? extends ErrorResultHandler>> classes = reflections.getSubTypesOf(ErrorResultHandler.class);
+
+        if (!ObjectUtils.isEmpty(classes)) {
+            if (classes.size() > 1) {
+                throw new BeanInitializationException("Multiple duplicates of beans 'errorResultHandler', There can only be one subclass");
+            }
+            Class<? extends ErrorResultHandler> aClass = classes.iterator().next();
+            try {
+                errorResultHandler = aClass.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+
+        } else {
             errorResultHandler = new ErrorResultHandler();
-            log.info("*** Initialize the default ErrorResultHandler processor ***");
         }
+
+        String name = errorResultHandler.getClass().getName();
+        log.info("*** Initialize the " + name + " processor ***");
     }
 
     @Override
@@ -108,7 +123,7 @@ public class ParamCheckIntercept extends HandlerInterceptorAdapter {
     }
 
 
-    private JSONObject getReqBodyParams(ServletRequest servletRequest){
+    private JSONObject getReqBodyParams(ServletRequest servletRequest) {
 
 
         try (InputStreamReader inputStreamReader = new InputStreamReader(servletRequest.getInputStream(), StandardCharsets.UTF_8)) {
