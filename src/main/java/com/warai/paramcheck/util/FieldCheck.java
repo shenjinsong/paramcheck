@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -33,12 +34,11 @@ public class FieldCheck {
 
     private final static String
             BAD_VALUE = "null|undefined",       // 错误值
-            OPR_EXPS = "[<>=_~|]",           // 操作符正则
-            OPR_EXPS_4_VALUE = "[<>=_~]",    // 限制值校验符正则
+            OPR_EXPS = "[<>=~|]",           // 操作符正则
+            OPR_EXPS_4_VALUE = "[<>=~]",    // 限制值校验符正则
             OR = "|",                           // 或运算符
             MAX_LENGTH = "~",                   // 最大长度
-            EQUAL_LENGTH = "_",                 // 相等长度
-            EQUAL_VALUE = "=",                  // 相等指定值
+            EQUAL_LENGTH = "=",                 // 相等长度
             LESS_THAN = "<",                    // 小于指定值
             GREATER_THAN = ">";                 // 大于指定值
 
@@ -64,41 +64,38 @@ public class FieldCheck {
         }
 
         checkStr = checkStr.replaceAll(" ", "");
+        log.info("校验的参数：" + checkStr);
 
         // 包含运算符做特殊检验
         if (OPR.matcher(checkStr).find()) {
             String[] checkStrs = checkStr.split(OPR_EXPS);
 
             // 包括数值限制校验：str - 4
-            if (OPR_4_VALUE.matcher(checkStr).find()) {
+            Matcher matcher = OPR_4_VALUE.matcher(checkStr);
+            if (matcher.find()) {
                 // 拿到校验字段的限制数值
                 String field = checkStrs[0];
                 Integer length;
                 try {
-                    length = Integer.valueOf(checkStrs[1]);
+                    length = Integer.valueOf(checkStrs[checkStrs.length - 1]);
                 } catch (Exception e) {
                     log.warning("*** @ParamCheck Incorrect use of restricted characters, Check invalid [" + checkStr + "] ***");
                     throw new BadStringOperationException("@ParamCheck : " + checkStr);
                 }
-                // TODO 拿到操作符
-                String operStr = "";
 
-                Object o = params.get(field);
-                return containErrorValue(o, length, operStr);
-//                if (o instanceof JSONArray) {
-//                    JSONArray o1 = (JSONArray) o;
-//                    // 数组时逐个判断
-//                    return o1.stream().anyMatch(o2 -> containErrorValue(o2, length, operStr));
-//                } else {
-//                    return containErrorValue(param.getString(field), length, operStr);
-//                }
+                // 拿到操作符
+                String operStr = matcher.group();
+                if (matcher.find()){
+                    operStr+=matcher.group();
+                }
+
+                return containErrorValue(params.get(field), length, operStr);
 
             } else {
                 // 无数值限制校验 str | str2
                 if (checkStr.contains(OR)) {
                     // field1 | field2 => {"field1", "field2"}
                     return Arrays.stream(checkStrs).allMatch(str -> containErrorValue(params.get(str)));
-
                 }
             }
             return true;
@@ -129,16 +126,15 @@ public class FieldCheck {
             return true;
         }
 
-        if (OR.equals(operStr) || length == null) {
-            return false;
-        }
-
         // TODO 其它操作符
         //              EQUAL_LENGTH = "_",               // 相等长度
         //            EQUAL_VALUE = "=",                  // 相等指定值
         //            LESS_THAN = "<",                    // 小于指定值
         //            GREATER_THAN = ">";
 
+        if (OR.equals(operStr) || length == null) {
+            return false;
+        }
 
         return obj.toString().length() > length;
     }
