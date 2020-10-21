@@ -45,7 +45,7 @@ public class FieldInspect {
 
     }
 
-    private boolean invalid(String checkStr){
+    private boolean invalid(String checkStr) throws BadStringOperationException {
 
         if (ObjectUtils.isEmpty(params)) {
             return true;
@@ -58,7 +58,6 @@ public class FieldInspect {
         if (Operator.OPR.matcher(checkStr).find()) {
             String[] checkStrs = checkStr.split(Operator.OPR_EXPS);
 
-            // 包括数值限制校验：str - 4
             Matcher matcher = Operator.OPR_4_VALUE.matcher(checkStr);
             if (matcher.find()) {
                 String value = checkStrs[checkStrs.length - 1];
@@ -72,7 +71,12 @@ public class FieldInspect {
             } else {
                 // 无数值限制校验 str | str2
                 if (checkStr.contains(Operator.OR)) {
-                    return Arrays.stream(checkStrs).allMatch(str -> containErrorValue(params.get(str)));
+                    for (String str : checkStrs) {
+                        if (!containErrorValue(params.get(str), null, Operator.OR)) {
+                            return false;
+                        }
+                    }
+                    return true;
                 }
             }
             return true;
@@ -82,11 +86,11 @@ public class FieldInspect {
         }
     }
 
-    private boolean containErrorValue(Object obj) {
+    private boolean containErrorValue(Object obj) throws BadStringOperationException {
         return containErrorValue(obj, null, null);
     }
 
-    private boolean containErrorValue(Object param, String value, String operStr) {
+    private boolean containErrorValue(Object param, String value, String operStr) throws BadStringOperationException {
         if (ObjectUtils.isEmpty(param)) {
             return true;
         } else if (param instanceof JSONArray) {
