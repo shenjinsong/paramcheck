@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.warai.paramcheck.annotation.ParamCheck;
 import com.warai.paramcheck.handler.ErrorResultHandler;
-import com.warai.paramcheck.util.FieldCheck;
+import com.warai.paramcheck.handler.FieldInspect;
 import org.reflections.Reflections;
 import org.reflections.util.ConfigurationBuilder;
 import org.springframework.beans.factory.BeanInitializationException;
@@ -97,16 +97,16 @@ public class ParamCheckIntercept extends HandlerInterceptorAdapter {
         ServletRequest servletRequest = new RequestReaderHttpServletRequestWrapper(request);
 
         // 检查参数
-        FieldCheck fieldCheck = this.checkReqParams(paramCheck, servletRequest, isRequestBody);
-        if (fieldCheck.isInvalid()) {
-            errorResultHandler.handler(fieldCheck.getBadFields(), paramCheck);
+        FieldInspect fieldInspect = this.checkReqParams(paramCheck, servletRequest, isRequestBody);
+        if (fieldInspect.isInvalid()) {
+            errorResultHandler.handler(fieldInspect.getBadFields(), paramCheck);
             return false;
         }
         return true;
     }
 
 
-    private FieldCheck checkReqParams(ParamCheck paramCheck, ServletRequest request, boolean isRequestBody) throws BadStringOperationException {
+    private FieldInspect checkReqParams(ParamCheck paramCheck, ServletRequest request, boolean isRequestBody) throws BadStringOperationException {
 
         JSONObject jsonObject;
 
@@ -117,7 +117,7 @@ public class ParamCheckIntercept extends HandlerInterceptorAdapter {
             String jsonStr = JSON.toJSONString(request.getParameterMap());
             jsonObject = JSON.parseObject(jsonStr);
         }
-        FieldCheck fieldCheck = new FieldCheck(paramCheck, jsonObject);
+        FieldInspect fieldCheck = new FieldInspect(paramCheck, jsonObject);
         fieldCheck.checkParam();
         return fieldCheck;
     }
