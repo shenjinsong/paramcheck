@@ -1,19 +1,16 @@
-package com.warai.paramcheck.handler;
+package com.warai.paramcheck;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.warai.paramcheck.annotation.ParamCheck;
-import com.warai.paramcheck.handler.chain.AbstractOperatorValidator;
+import com.warai.paramcheck.chain.AbstractOperatorValidator;
 import org.springframework.util.ObjectUtils;
 
 import javax.management.BadStringOperationException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @Auther: わらい
@@ -91,9 +88,7 @@ public class FieldInspect {
     }
 
     private boolean containErrorValue(Object param, String value, String operStr) throws BadStringOperationException {
-        if (ObjectUtils.isEmpty(param)) {
-            return true;
-        } else if (param instanceof JSONArray) {
+        if (param instanceof JSONArray) {
             JSONArray jsonArray = (JSONArray) param;
             for (Object o : jsonArray) {
                 if (containErrorValue(o, value, operStr)) {

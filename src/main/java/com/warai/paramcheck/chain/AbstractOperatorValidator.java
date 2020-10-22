@@ -1,7 +1,8 @@
-package com.warai.paramcheck.handler.chain;
+package com.warai.paramcheck.chain;
 
 import com.alibaba.fastjson.JSON;
-import com.warai.paramcheck.handler.Operator;
+import com.warai.paramcheck.Operator;
+import org.springframework.util.ObjectUtils;
 
 import javax.management.BadStringOperationException;
 import java.util.logging.Logger;
@@ -18,7 +19,7 @@ public abstract class AbstractOperatorValidator {
 
     public boolean inspectPass(Object param, String value, String operStr) throws BadStringOperationException {
         log.info("Current validator" + this.getClass().getName());
-        if (this.operStr.equals(operStr)) {
+        if (ObjectUtils.nullSafeEquals(this.operStr, operStr)) {
             log.info(this.getClass().getName() + "to verify : " + operStr);
             if (Operator.ERROR_VALUE.matcher(JSON.toJSONString(param).toLowerCase()).find()) {
                 return false;
@@ -47,11 +48,13 @@ public abstract class AbstractOperatorValidator {
         GreaterThanOperatorValidator greaterThanOperatorValidator = new GreaterThanOperatorValidator();
         LessThanOperatorValidator lessThanOperatorValidator = new LessThanOperatorValidator();
         MaxLengthOperatorValidator maxLengthOperatorValidator = new MaxLengthOperatorValidator();
+        DefaultOperatorValidator defaultOperatorValidator = new DefaultOperatorValidator();
 
         orOperatorValidator.setNextOperatorValidator(equalLengthOperatorValidator);
         equalLengthOperatorValidator.setNextOperatorValidator(greaterThanOperatorValidator);
         greaterThanOperatorValidator.setNextOperatorValidator(lessThanOperatorValidator);
         lessThanOperatorValidator.setNextOperatorValidator(maxLengthOperatorValidator);
+        maxLengthOperatorValidator.setNextOperatorValidator(defaultOperatorValidator);
 
         return orOperatorValidator;
     }

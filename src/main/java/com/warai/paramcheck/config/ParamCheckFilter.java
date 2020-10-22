@@ -1,4 +1,4 @@
-package com.warai.paramcheck;
+package com.warai.paramcheck.config;
 
 
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +9,10 @@ import java.io.IOException;
 
 @Configuration
 public class ParamCheckFilter implements Filter {
+
+
+    @Override
+    public void init(FilterConfig filterConfig){}
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -24,7 +28,11 @@ public class ParamCheckFilter implements Filter {
         } else {
             chain.doFilter(requestWrapper, response);
         }
+    }
 
+
+    @Override
+    public void destroy() {
 
     }
 }

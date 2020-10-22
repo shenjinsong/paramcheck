@@ -1,4 +1,4 @@
-package com.warai.paramcheck.handler;
+package com.warai.paramcheck;
 
 import com.alibaba.fastjson.JSON;
 import com.warai.paramcheck.annotation.ParamCheck;

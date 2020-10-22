@@ -1,9 +1,9 @@
-package com.warai.paramcheck;
+package com.warai.paramcheck.config;
 
 import org.springframework.util.StreamUtils;
 
 
-import javax.servlet.ReadListener;
+
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -21,7 +21,7 @@ public class RequestReaderHttpServletRequestWrapper extends HttpServletRequestWr
 
     private final byte[] inputStreamBytes;
 
-    RequestReaderHttpServletRequestWrapper(HttpServletRequest request) throws IOException {
+    public RequestReaderHttpServletRequestWrapper(HttpServletRequest request) throws IOException {
         super(request);
         inputStreamBytes = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8).getBytes(StandardCharsets.UTF_8);
     }
@@ -37,25 +37,9 @@ public class RequestReaderHttpServletRequestWrapper extends HttpServletRequestWr
         final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(inputStreamBytes);
 
         return new ServletInputStream() {
-
             @Override
             public int read() {
                 return byteArrayInputStream.read();
-            }
-
-            @Override
-            public boolean isFinished() {
-                return false;
-            }
-
-            @Override
-            public boolean isReady() {
-                return false;
-            }
-
-            @Override
-            public void setReadListener(ReadListener readListener) {
-
             }
         };
     }

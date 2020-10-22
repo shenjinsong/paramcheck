@@ -1,6 +1,6 @@
-package com.warai.paramcheck.handler.chain;
+package com.warai.paramcheck.chain;
 
-import com.warai.paramcheck.handler.Operator;
+import com.warai.paramcheck.Operator;
 import org.springframework.util.ObjectUtils;
 
 /**
