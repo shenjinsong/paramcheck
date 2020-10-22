@@ -49,7 +49,7 @@ public class FieldInspect {
         }
 
         checkStr = checkStr.replaceAll(" ", "");
-        log.info("校验的参数：" + checkStr);
+//        log.info("校验的参数：" + checkStr);
 
         // 包含运算符做特殊检验
         if (Operator.OPR.matcher(checkStr).find()) {
