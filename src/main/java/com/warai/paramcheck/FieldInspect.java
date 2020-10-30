@@ -104,6 +104,10 @@ public class FieldInspect {
         return badFields;
     }
 
+    public JSONObject getParams() {
+        return params;
+    }
+
     public boolean isInvalid() {
         return invalid;
     }

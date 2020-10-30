@@ -98,7 +98,7 @@ public class ParamCheckIntercept extends HandlerInterceptorAdapter {
         // 检查参数
         FieldInspect fieldInspect = this.checkReqParams(paramCheck, servletRequest, isRequestBody);
         if (fieldInspect.isInvalid()) {
-            errorResultHandler.handler(fieldInspect.getBadFields(), paramCheck);
+            errorResultHandler.handler(fieldInspect.getParams(), fieldInspect.getBadFields(), paramCheck);
             return false;
         }
         return true;

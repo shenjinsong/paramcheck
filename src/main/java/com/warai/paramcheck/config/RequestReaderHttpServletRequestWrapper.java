@@ -43,4 +43,14 @@ public class RequestReaderHttpServletRequestWrapper extends HttpServletRequestWr
             }
         };
     }
+
+//    @Override
+//    public String getRequestURI() {
+//        return super.getRequestURI();
+//    }
+//
+//    @Override
+//    public StringBuffer getRequestURL() {
+//        return super.getRequestURL();
+//    }
 }

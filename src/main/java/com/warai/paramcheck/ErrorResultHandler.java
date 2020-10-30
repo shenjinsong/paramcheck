@@ -1,6 +1,7 @@
 package com.warai.paramcheck;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.warai.paramcheck.annotation.ParamCheck;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -20,18 +21,18 @@ import java.util.Map;
  */
 public class ErrorResultHandler {
 
-    public void handler(List<String> badFields, ParamCheck paramCheck) throws IOException {
+   public void handler(JSONObject params, List<String> badFields, ParamCheck paramCheck) throws IOException {
         Map<String, Object> map = new HashMap<>(1);
         map.put("code", paramCheck.errorCode());
         map.put("msg", paramCheck.msg());
         this.handler(map, HttpStatus.PRECONDITION_FAILED);
     }
 
-    private void handler(Map responseMsg, HttpStatus status) throws IOException {
+    public void handler(Map responseMsg, HttpStatus status) throws IOException {
         new ParamException(responseMsg,  status).build();
     }
 
-    public class ParamException extends Exception{
+    private class ParamException extends Exception{
 
         private Map msg;
         private HttpStatus status;
