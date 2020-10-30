@@ -34,6 +34,7 @@ public class FieldInspect {
     public void checkParam() throws BadStringOperationException {
         for (String checkStr : paramCheck.value()) {
             if (invalid(checkStr)) {
+                checkStr = checkStr.split(Operator.OPR_EXPS)[0];
                 badFields.add(checkStr);
                 this.invalid = true;
                 log.warning("*** Bad field : " + checkStr + " ***");
