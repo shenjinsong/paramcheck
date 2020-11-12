@@ -18,7 +18,7 @@ public class EqualLengthOperatorValidator extends AbstractOperatorValidator {
     protected boolean valid(Object param, String value) {
 
         if (!NumberUtils.isCreatable(value)) {
-            log.warning("Check failure : param" + param + ", limiting condition : " + operStr + " " + value);
+//            log.warning("Check failure : param" + param + ", limiting condition : " + operStr + " " + value);
             return false;
         }
 

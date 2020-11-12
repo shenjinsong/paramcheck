@@ -19,13 +19,9 @@ import java.nio.charset.StandardCharsets;
 public class RequestReaderHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     private final byte[] inputStreamBytes;
-    private String requestURI;
-    private StringBuffer requestURL;
 
     public RequestReaderHttpServletRequestWrapper(HttpServletRequest request) throws IOException {
         super(request);
-        requestURI = request.getRequestURI();
-        requestURL = request.getRequestURL();
         inputStreamBytes = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8).getBytes(StandardCharsets.UTF_8);
     }
 
@@ -36,9 +32,7 @@ public class RequestReaderHttpServletRequestWrapper extends HttpServletRequestWr
 
     @Override
     public ServletInputStream getInputStream() {
-
         final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(inputStreamBytes);
-
         return new ServletInputStream() {
             @Override
             public int read() {
@@ -47,13 +41,4 @@ public class RequestReaderHttpServletRequestWrapper extends HttpServletRequestWr
         };
     }
 
-    @Override
-    public String getRequestURI() {
-        return this.requestURI;
-    }
-
-    @Override
-    public StringBuffer getRequestURL() {
-        return this.requestURL;
-    }
 }
