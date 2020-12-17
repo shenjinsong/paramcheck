@@ -12,7 +12,7 @@ public @interface ParamCheck {
 
     String[] value() default {};
 
-    String errorCode() default  "999001";
+    String errorCode() default  "400154";
 
     String msg() default "Bad request parameter";
 
