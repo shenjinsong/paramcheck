@@ -1,9 +1,9 @@
-package com.warai.paramcheck;
+package org.warai.paramcheck;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.warai.paramcheck.annotation.ParamCheck;
-import com.warai.paramcheck.config.RequestReaderHttpServletRequestWrapper;
+import org.warai.paramcheck.annotation.ParamCheck;
+import org.warai.paramcheck.config.RequestReaderHttpServletRequestWrapper;
 import org.reflections.Reflections;
 import org.reflections.util.ConfigurationBuilder;
 import org.springframework.beans.factory.BeanInitializationException;

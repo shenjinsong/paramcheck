@@ -1,9 +1,9 @@
-package com.warai.paramcheck;
+package org.warai.paramcheck;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.warai.paramcheck.annotation.ParamCheck;
-import com.warai.paramcheck.chain.AbstractOperatorValidator;
+import org.warai.paramcheck.annotation.ParamCheck;
+import org.warai.paramcheck.chain.AbstractOperatorValidator;
 import org.springframework.util.ObjectUtils;
 
 import javax.management.BadStringOperationException;

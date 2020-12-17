@@ -1,6 +1,6 @@
-package com.warai.paramcheck.chain;
+package org.warai.paramcheck.chain;
 
-import com.warai.paramcheck.Operator;
+import org.warai.paramcheck.Operator;
 
 import org.apache.commons.lang3.math.NumberUtils;
 

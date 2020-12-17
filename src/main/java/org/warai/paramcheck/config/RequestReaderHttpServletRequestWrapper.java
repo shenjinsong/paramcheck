@@ -1,4 +1,4 @@
-package com.warai.paramcheck.config;
+package org.warai.paramcheck.config;
 
 import org.springframework.util.StreamUtils;
 

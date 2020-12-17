@@ -1,11 +1,10 @@
-package com.warai.paramcheck.chain;
+package org.warai.paramcheck.chain;
 
 import com.alibaba.fastjson.JSON;
-import com.warai.paramcheck.Operator;
+import org.warai.paramcheck.Operator;
 import org.springframework.util.ObjectUtils;
 
 import javax.management.BadStringOperationException;
-import java.util.logging.Logger;
 
 /**
  * @Auther: わらい

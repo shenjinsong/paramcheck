@@ -1,6 +1,6 @@
-package com.warai.paramcheck.config;
+package org.warai.paramcheck.config;
 
-import com.warai.paramcheck.ParamCheckIntercept;
+import org.warai.paramcheck.ParamCheckIntercept;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;

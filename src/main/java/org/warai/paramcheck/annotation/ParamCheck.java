@@ -1,4 +1,4 @@
-package com.warai.paramcheck.annotation;
+package org.warai.paramcheck.annotation;
 
 import java.lang.annotation.*;
 

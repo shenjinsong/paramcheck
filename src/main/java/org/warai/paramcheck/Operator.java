@@ -1,4 +1,4 @@
-package com.warai.paramcheck;
+package org.warai.paramcheck;
 
 import java.util.regex.Pattern;
 
