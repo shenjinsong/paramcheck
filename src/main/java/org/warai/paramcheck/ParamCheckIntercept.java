@@ -2,15 +2,17 @@ package org.warai.paramcheck;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import org.warai.paramcheck.annotation.ParamCheck;
-import org.warai.paramcheck.config.RequestReaderHttpServletRequestWrapper;
-import org.reflections.Reflections;
-import org.reflections.util.ConfigurationBuilder;
-import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.warai.paramcheck.annotation.ParamCheck;
+import org.warai.paramcheck.config.RequestReaderHttpServletRequestWrapper;
 
 import javax.management.BadStringOperationException;
 import javax.servlet.ServletRequest;
@@ -21,7 +23,6 @@ import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
-import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -37,28 +38,52 @@ public class ParamCheckIntercept extends HandlerInterceptorAdapter {
     private static ErrorResultHandler errorResultHandler;
 
 
-    static {
-
-        Reflections reflections = new Reflections(new ConfigurationBuilder().forPackages(""));
-        Set<Class<? extends ErrorResultHandler>> classes = reflections.getSubTypesOf(ErrorResultHandler.class);
-
-        if (!ObjectUtils.isEmpty(classes)) {
-            if (classes.size() > 1) {
-                throw new BeanInitializationException("Multiple duplicates of beans 'errorResultHandler', There can only be one subclass");
+    @Component
+    public static class  SpringUtil implements ApplicationContextAware {
+        private static ApplicationContext applicationContext = null;
+        @Override
+        public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+            if (SpringUtil.applicationContext == null) {
+                SpringUtil.applicationContext = applicationContext;
             }
-            Class<? extends ErrorResultHandler> aClass = classes.iterator().next();
-            try {
-                errorResultHandler = aClass.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
-            }
-
-        } else {
-            errorResultHandler = new ErrorResultHandler();
         }
 
-        String name = errorResultHandler.getClass().getName();
-        log.info("*** Initialize the " + name + " processor ***");
+        public static <T> T getBean(Class<T> clazz) {
+            return applicationContext.getBean(clazz);
+        }
+    }
+//
+//    static {
+//
+//        Reflections reflections = new Reflections(new ConfigurationBuilder().forPackages(""));
+//        Set<Class<? extends ErrorResultHandler>> classes = reflections.getSubTypesOf(ErrorResultHandler.class);
+//
+//        if (!ObjectUtils.isEmpty(classes)) {
+//            if (classes.size() > 1) {
+//                throw new BeanInitializationException("Multiple duplicates of beans 'errorResultHandler', There can only be one subclass");
+//            }
+//            Class<? extends ErrorResultHandler> aClass = classes.iterator().next();
+//            try {
+//                errorResultHandler = aClass.newInstance();
+//            } catch (InstantiationException | IllegalAccessException e) {
+//                e.printStackTrace();
+//            }
+//
+//        } else {
+//            errorResultHandler = new ErrorResultHandler();
+//        }
+//
+//        String name = errorResultHandler.getClass().getName();
+//        log.info("*** Initialize the " + name + " processor ***");
+//    }
+
+    static {
+        try {
+            errorResultHandler = SpringUtil.getBean(ErrorResultHandler.class);
+            log.info("*** Initialize the ErrorResultHandler processor ***");
+        } catch (Exception e) {
+            throw new NoSuchBeanDefinitionException("ParamCheck lacks the error result handling class and needs to inherit the ErrorResultHandler interface");
+        }
     }
 
     @Override
