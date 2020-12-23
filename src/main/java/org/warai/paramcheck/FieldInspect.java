@@ -96,9 +96,11 @@ public class FieldInspect {
                     return true;
                 }
             }
+            return false;
+        }else {
+            return !operatorValidatorChain.inspectPass(param, value, operStr);
         }
 
-        return !operatorValidatorChain.inspectPass(param, value, operStr);
     }
 
     public List<String> getBadFields() {
