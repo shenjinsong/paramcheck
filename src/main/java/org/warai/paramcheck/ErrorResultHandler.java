@@ -49,6 +49,8 @@ public class ErrorResultHandler {
                 if (response != null){
                     response.setStatus(status.value());
                     response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+                    response.setHeader("Content-type", "text/html;charset=UTF-8");
+//                    response.setCharacterEncoding(StandardCharsets.ISO_8859_1.name());
                     PrintWriter out = response.getWriter();
                     String json = JSON.toJSONString(msg);
                     out.write(json);
