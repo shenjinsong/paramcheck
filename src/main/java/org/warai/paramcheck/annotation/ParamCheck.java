@@ -16,4 +16,6 @@ public @interface ParamCheck {
 
     String msg() default "Bad request parameter";
 
+    int httpCode() default 200;
+
 }
