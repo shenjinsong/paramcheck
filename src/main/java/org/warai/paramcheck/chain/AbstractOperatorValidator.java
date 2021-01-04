@@ -47,13 +47,18 @@ public abstract class AbstractOperatorValidator {
         GreaterThanOperatorValidator greaterThanOperatorValidator = new GreaterThanOperatorValidator();
         LessThanOperatorValidator lessThanOperatorValidator = new LessThanOperatorValidator();
         MaxLengthOperatorValidator maxLengthOperatorValidator = new MaxLengthOperatorValidator();
+        GreaterThanEqualOperatorValidator greaterThanEqualOperatorValidator = new GreaterThanEqualOperatorValidator();
+        LessThanEqualOperatorValidator lessThanEqualOperatorValidator = new LessThanEqualOperatorValidator();
         DefaultOperatorValidator defaultOperatorValidator = new DefaultOperatorValidator();
 
         orOperatorValidator.setNextOperatorValidator(equalLengthOperatorValidator);
         equalLengthOperatorValidator.setNextOperatorValidator(greaterThanOperatorValidator);
         greaterThanOperatorValidator.setNextOperatorValidator(lessThanOperatorValidator);
         lessThanOperatorValidator.setNextOperatorValidator(maxLengthOperatorValidator);
-        maxLengthOperatorValidator.setNextOperatorValidator(defaultOperatorValidator);
+        maxLengthOperatorValidator.setNextOperatorValidator(greaterThanEqualOperatorValidator);
+        greaterThanEqualOperatorValidator.setNextOperatorValidator(lessThanEqualOperatorValidator);
+        lessThanEqualOperatorValidator.setNextOperatorValidator(defaultOperatorValidator);
+
 
         return orOperatorValidator;
     }

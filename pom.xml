@@ -6,7 +6,7 @@
 
     <groupId>org.warai</groupId>
     <artifactId>paramcheck</artifactId>
-    <version>0.1.2</version>
+    <version>0.1.3</version>
 
     <dependencies>
         <dependency>

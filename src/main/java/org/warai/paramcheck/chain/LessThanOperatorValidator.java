@@ -16,7 +16,6 @@ public class LessThanOperatorValidator extends AbstractOperatorValidator {
     @Override
     protected boolean valid(Object param, String value) {
         if (!NumberUtils.isCreatable(param.toString()) || !NumberUtils.isCreatable(value)) {
-//            log.warning("Check failure : param : " + param + ", limiting condition : " + operStr + " " + value);
             return false;
         }
         return NumberUtils.createDouble(param.toString()) < NumberUtils.createDouble(value);

@@ -16,7 +16,6 @@ public class MaxLengthOperatorValidator extends AbstractOperatorValidator{
     @Override
     protected boolean valid(Object param, String value) {
         if (!NumberUtils.isCreatable(value)) {
-//            log.warning("Check failure : param" + param + ", limiting condition : " + operStr + " " + value);
             return false;
         }
         return param.toString().length() <= NumberUtils.createInteger(value);

@@ -15,6 +15,8 @@ public interface Operator {
     String EQUAL_LENGTH = "=";                 // 相等长度
     String LESS_THAN = "<";                    // 小于指定值
     String GREATER_THAN = ">";                 // 大于指定值
+    String GREATER_THAN_EQUAL = ">=";          // 大于或者等于指定值
+    String LESS_THAN_EQUAL = "<=";          // 小于或者等于指定值
     Pattern ERROR_VALUE = Pattern.compile(Operator.BAD_VALUE);
     Pattern OPR = Pattern.compile(Operator.OPR_EXPS);
     Pattern OPR_4_VALUE = Pattern.compile(Operator.OPR_EXPS_4_VALUE);
