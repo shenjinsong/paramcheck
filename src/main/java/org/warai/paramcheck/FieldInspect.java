@@ -17,6 +17,11 @@ import java.util.regex.Matcher;
  * @Time: 2020/10/16 17:36
  */
 public class FieldInspect {
+    /* 预计添加的功能：
+        1、增加自定义处理类，在注解时标识处理类
+        2、增加springEL表达式用法
+        3、参数增加可选 (不传值时不校验，传值时做指定校验)
+    */
 
     private List<String> badFields = new ArrayList<>(1);
     private boolean invalid;
@@ -60,7 +65,7 @@ public class FieldInspect {
             if (matcher.find()) {
                 String value = checkStrs[checkStrs.length - 1];
 
-                // 拿到操作符
+                // 拿到操作符， 支持多个： >=、<=
                 String operStr = matcher.group();
                 if (matcher.find()) {
                     operStr += matcher.group();
