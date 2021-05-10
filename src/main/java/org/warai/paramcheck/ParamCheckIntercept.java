@@ -118,10 +118,10 @@ public class ParamCheckIntercept extends HandlerInterceptorAdapter {
         }
 
         // 拿到可重用的流
-        ServletRequest servletRequest = new RequestReaderHttpServletRequestWrapper(request);
+//        ServletRequest servletRequest = new RequestReaderHttpServletRequestWrapper(request);
 
         // 检查参数
-        FieldInspect fieldInspect = this.checkReqParams(paramCheck, servletRequest, isRequestBody);
+        FieldInspect fieldInspect = this.checkReqParams(paramCheck, request, isRequestBody);
         if (fieldInspect.isInvalid()) {
             errorResultHandler.handler(fieldInspect.getParams(), fieldInspect.getBadFields(), paramCheck);
             return false;
