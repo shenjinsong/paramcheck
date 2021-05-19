@@ -31,6 +31,7 @@ public class RequestReaderHttpServletRequestWrapper extends HttpServletRequestWr
 
     @Override
     public Map getParameterMap() {
+        // 使用 super.getParameterMap() 也可以
         return this.parameterMap;
     }
 
