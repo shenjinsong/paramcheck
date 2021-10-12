@@ -1,61 +1,116 @@
 package org.warai.paramcheck;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.warai.paramcheck.annotation.ParamCheck;
-import org.warai.paramcheck.chain.AbstractOperatorValidator;
 import org.springframework.util.ObjectUtils;
+import org.warai.paramcheck.annotation.InnerObj;
+import org.warai.paramcheck.annotation.ParamCheck;
+import org.warai.paramcheck.constant.Operator;
+import org.warai.paramcheck.constant.Validator;
+import org.warai.paramcheck.validator.ParamCheckValidator;
+import org.warai.paramcheck.validator.chain.AbstractOperatorValidator;
 
-import javax.management.BadStringOperationException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.util.*;
 import java.util.regex.Matcher;
+
 
 /**
  * @Auther: わらい
  * @Time: 2020/10/16 17:36
  */
 public class FieldInspect {
-    /* 预计添加的功能：
-        1、增加自定义处理类，在注解时标识处理类
-        2、增加springEL表达式用法
-        3、参数增加可选 (不传值时不校验，传值时做指定校验)
-    */
 
-    private List<String> badFields = new ArrayList<>(1);
-    private boolean invalid;
+    private Map<String, Set<String>> badFields = new HashMap<>(1);
+    private Map<String, List<Annotation>> fieldInfoMap = new HashMap<>(1);
+    private String SEPARATOR = ".";
     private JSONObject params;
     private ParamCheck paramCheck;
+    private String currentKey;
     private static AbstractOperatorValidator operatorValidatorChain = AbstractOperatorValidator.getChainOfOperatorValidator();
-
-    private static Logger log = Logger.getLogger(FieldInspect.class.getName());
 
     public FieldInspect(ParamCheck paramCheck, JSONObject params) {
         this.params = params;
         this.paramCheck = paramCheck;
+        this.getAnnoInfo();
     }
 
-    public void checkParam() throws BadStringOperationException {
-        for (String checkStr : paramCheck.value()) {
-            if (invalid(checkStr)) {
-                checkStr = checkStr.replace(" ","").split(Operator.OPR_EXPS)[0];
-                badFields.add(checkStr);
-                this.invalid = true;
-                log.warning("*** Bad field : " + checkStr + " ***");
+    // 多层对象校验
+    private void check(String key, List<Annotation> annoList, JSON params) {
+
+        if (params != null && (key.contains(SEPARATOR) || params instanceof JSONArray)) { // 递归取参进行校验
+
+            if (params instanceof JSONObject) {
+                // 字段包含自定义对象类型
+                String[] res = key.split("\\" + SEPARATOR, 2);
+                String key1 = res[0];
+                String key2 = res[1];
+                JSONObject jsonObject = (JSONObject) params;
+                params = (JSON) jsonObject.get(key1);
+                // 下一层参数的key
+                this.check(key2, annoList, params);
+            } else {
+                JSONArray jsonArray = (JSONArray) params;
+                for (Object obj : jsonArray) {
+                    this.check(key, annoList, (JSON) obj);
+                }
+            }
+
+        } else {
+            // 这里才是做校验的地方
+            // 参数为null 交给验证器处理
+            for (int i = 0, size = annoList.size(); i < size; i++) {
+                this.objCheck(key, params, annoList.get(i));
             }
         }
-
     }
 
-    private boolean invalid(String checkStr) throws BadStringOperationException {
+    private void objCheck(String key, JSON json, Annotation annotation) {
+        Object value = null;
+        if (json != null) {
+            JSONObject jsonObject = json.toJavaObject(JSONObject.class);
+            value = jsonObject.get(key);
+        }
+        ParamCheckValidator<Annotation> paramCheckValidator = Validator.get(paramCheck, annotation);
+        if (paramCheckValidator.invalid(value)) {
+            String desc = paramCheckValidator.getFailMsg() + " | 参数：" + value;
+            if (desc.length() > 50) {
+                desc = desc.substring(0, 50) + " ...";
+            }
+            this.setBadFields(currentKey, desc);
+        }
+    }
+
+
+    public FieldInspect checkParam() {
+        long l = System.currentTimeMillis();
+        // 注解字段校验
+        for (Map.Entry<String, List<Annotation>> entry : fieldInfoMap.entrySet()) {
+            String key = entry.getKey();
+            List<Annotation> value = entry.getValue();
+            this.currentKey = key;
+            check(key, value, params);
+        }
+        // 普通校验
+        for (String checkStr : paramCheck.value()) {
+            if (invalid(checkStr)) {
+                checkStr = checkStr.replace(" ", "").split(Operator.OPR_EXPS)[0];
+                this.setBadFields(checkStr, paramCheck.msg());
+            }
+        }
+        return this;
+    }
+
+    private boolean invalid(String checkStr) {
 
         if (ObjectUtils.isEmpty(params)) {
             return true;
         }
 
         checkStr = checkStr.replaceAll(" ", "");
-//        log.info("校验的参数：" + checkStr);
 
         // 包含运算符做特殊检验
         if (Operator.OPR.matcher(checkStr).find()) {
@@ -65,7 +120,7 @@ public class FieldInspect {
             if (matcher.find()) {
                 String value = checkStrs[checkStrs.length - 1];
 
-                // 拿到操作符， 支持多个： >=、<=
+                // 拿到操作符
                 String operStr = matcher.group();
                 if (matcher.find()) {
                     operStr += matcher.group();
@@ -89,34 +144,82 @@ public class FieldInspect {
         }
     }
 
-    private boolean containErrorValue(Object obj) throws BadStringOperationException {
+    private boolean containErrorValue(Object obj) {
         return containErrorValue(obj, null, null);
     }
 
-    private boolean containErrorValue(Object param, String value, String operStr) throws BadStringOperationException {
-        if (param instanceof JSONArray) {
-            JSONArray jsonArray = (JSONArray) param;
-            for (Object o : jsonArray) {
-                if (containErrorValue(o, value, operStr)) {
-                    return true;
-                }
-            }
-            return false;
-        }else {
-            return !operatorValidatorChain.inspectPass(param, value, operStr);
-        }
+
+    private boolean containErrorValue(Object param, String value, String operStr) {
+        return !operatorValidatorChain.inspectPass(param, value, operStr);
 
     }
+//    private boolean containErrorValue(Object param, String value, String operStr) throws BadStringOperationException {
+//        if (param instanceof JSONArray) {
+//            JSONArray jsonArray = (JSONArray) param;
+//            for (Object o : jsonArray) {
+//                if (containErrorValue(o, value, operStr)) {
+//                    return true;
+//                }
+//            }
+//            return false;
+//        } else {
+//            return !operatorValidatorChain.inspectPass(param, value, operStr);
+//        }
+//
+//    }
 
-    public List<String> getBadFields() {
+
+    private Map<String, List<Annotation>> getAnnoInfo(Class cls) {
+        Map<String, List<Annotation>> map = new HashMap<>();
+        Field[] fields = cls.getDeclaredFields();
+        for (Field field : fields) {
+            List<Annotation> annoList = new ArrayList<>();
+            for (Annotation annotation : field.getDeclaredAnnotations()) {
+                if (annotation.annotationType().getPackage().getName().contains(this.getClass().getPackage().getName())) {
+                    if (annotation instanceof InnerObj) {
+                        InnerObj innerObj = (InnerObj) annotation;
+                        Map<String, List<Annotation>> annoInfo = getAnnoInfo(innerObj.value());
+                        annoInfo.keySet().forEach(key -> map.put(field.getName() + SEPARATOR + key, annoInfo.get(key)));
+                    } else {
+                        annoList.add(annotation);
+                    }
+                }
+            }
+            if (!annoList.isEmpty()) {
+                map.put(field.getName(), annoList);
+            }
+        }
+        return map;
+    }
+
+
+    private void getAnnoInfo() {
+        // 需要校验的字段和校验注解信息
+        for (Class cls : paramCheck.classes()) {
+            Map<String, List<Annotation>> map = this.getAnnoInfo(cls);
+            fieldInfoMap.putAll(map);
+        }
+    }
+
+
+    Map<String, Set<String>> getBadFields() {
         return badFields;
     }
 
-    public JSONObject getParams() {
+    private void setBadFields(String field, String failMsg) {
+        Set<String> msg = new HashSet<>(1);
+        if (badFields.containsKey(field)) {
+            msg = badFields.get(field);
+        }
+        msg.add(failMsg);
+        this.badFields.put(field, msg);
+    }
+
+    JSONObject getParams() {
         return params;
     }
 
     public boolean isInvalid() {
-        return invalid;
+        return !badFields.isEmpty();
     }
 }

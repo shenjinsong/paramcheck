@@ -7,14 +7,10 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.warai.paramcheck.annotation.ParamCheck;
-import org.warai.paramcheck.config.RequestReaderHttpServletRequestWrapper;
-
-import javax.management.BadStringOperationException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,10 +33,10 @@ public class ParamCheckIntercept extends HandlerInterceptorAdapter {
     private static Logger log = Logger.getLogger(ParamCheckIntercept.class.getName());
     private static ErrorResultHandler errorResultHandler;
 
-
     @Component
-    public static class  SpringUtil implements ApplicationContextAware {
+    public static class SpringUtil implements ApplicationContextAware {
         private static ApplicationContext applicationContext = null;
+
         @Override
         public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
             if (SpringUtil.applicationContext == null) {
@@ -52,30 +48,6 @@ public class ParamCheckIntercept extends HandlerInterceptorAdapter {
             return applicationContext.getBean(clazz);
         }
     }
-//
-//    static {
-//
-//        Reflections reflections = new Reflections(new ConfigurationBuilder().forPackages(""));
-//        Set<Class<? extends ErrorResultHandler>> classes = reflections.getSubTypesOf(ErrorResultHandler.class);
-//
-//        if (!ObjectUtils.isEmpty(classes)) {
-//            if (classes.size() > 1) {
-//                throw new BeanInitializationException("Multiple duplicates of beans 'errorResultHandler', There can only be one subclass");
-//            }
-//            Class<? extends ErrorResultHandler> aClass = classes.iterator().next();
-//            try {
-//                errorResultHandler = aClass.newInstance();
-//            } catch (InstantiationException | IllegalAccessException e) {
-//                e.printStackTrace();
-//            }
-//
-//        } else {
-//            errorResultHandler = new ErrorResultHandler();
-//        }
-//
-//        String name = errorResultHandler.getClass().getName();
-//        log.info("*** Initialize the " + name + " processor ***");
-//    }
 
     static {
         try {
@@ -98,12 +70,12 @@ public class ParamCheckIntercept extends HandlerInterceptorAdapter {
 
         // 判断是有@PramCheck 注解和注解中是否存在需要校验的字段， 没有直接返回
         ParamCheck paramCheck = method.getAnnotation(ParamCheck.class);
-        if (paramCheck == null || ObjectUtils.isEmpty(paramCheck.value())) {
+        if (paramCheck == null) {
             return true;
         }
 
+        long l = System.currentTimeMillis();
         Annotation[][] parameterAnnotationArrays = method.getParameterAnnotations();
-
         // 判断请求参数是否是请求体传过来
         boolean isRequestBody = false;
         query:
@@ -117,23 +89,8 @@ public class ParamCheckIntercept extends HandlerInterceptorAdapter {
             }
         }
 
-        // 拿到可重用的流
-        ServletRequest servletRequest = new RequestReaderHttpServletRequestWrapper(request);
-
-        // 检查参数
-        FieldInspect fieldInspect = this.checkReqParams(paramCheck, servletRequest, isRequestBody);
-        if (fieldInspect.isInvalid()) {
-            errorResultHandler.handler(fieldInspect.getParams(), fieldInspect.getBadFields(), paramCheck);
-            return false;
-        }
-        return true;
-    }
-
-
-    private FieldInspect checkReqParams(ParamCheck paramCheck, ServletRequest request, boolean isRequestBody) throws BadStringOperationException {
-
+        // 获取参数
         JSONObject jsonObject;
-
         // 链接中包含参数，和请求体中参数校验过程
         if (isRequestBody) {
             jsonObject = this.parseReqBodyParams(request);
@@ -141,18 +98,23 @@ public class ParamCheckIntercept extends HandlerInterceptorAdapter {
             String jsonStr = JSON.toJSONString(request.getParameterMap());
             jsonObject = JSON.parseObject(jsonStr);
         }
-        FieldInspect fieldCheck = new FieldInspect(paramCheck, jsonObject);
-        fieldCheck.checkParam();
-        return fieldCheck;
-    }
 
+        long l2 = System.currentTimeMillis();
+        FieldInspect fieldInspect = new FieldInspect(paramCheck, jsonObject).checkParam();
+        long l3 = System.currentTimeMillis();
+        log.warning("*** 参数校验耗时：" + (l3 - l2) + " ms ***");
+        if (fieldInspect.isInvalid()) {
+            errorResultHandler.handler(fieldInspect.getParams(), fieldInspect.getBadFields(), paramCheck);
+            return false;
+        }
+        return true;
+    }
 
     private JSONObject parseReqBodyParams(ServletRequest servletRequest) {
 
 
-        try (InputStreamReader inputStreamReader = new InputStreamReader(servletRequest.getInputStream(), StandardCharsets.UTF_8)) {
-
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        try (InputStreamReader inputStreamReader = new InputStreamReader(servletRequest.getInputStream(), StandardCharsets.UTF_8);
+             BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             // 将请求中的请求体通过流读成字符
             String jsonStr = bufferedReader.lines().collect(Collectors.joining());

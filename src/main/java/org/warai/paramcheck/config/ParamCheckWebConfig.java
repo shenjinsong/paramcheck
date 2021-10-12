@@ -1,6 +1,6 @@
 package org.warai.paramcheck.config;
 
-import org.warai.paramcheck.ParamCheckIntercept;
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -10,6 +10,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.config.annotation.*;
+import org.warai.paramcheck.ParamCheckIntercept;
 
 import java.util.List;
 

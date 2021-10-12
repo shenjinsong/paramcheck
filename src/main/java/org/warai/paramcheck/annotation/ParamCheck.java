@@ -1,5 +1,6 @@
 package org.warai.paramcheck.annotation;
 
+import org.warai.paramcheck.constant.ErrorMessage;
 import java.lang.annotation.*;
 
 /**
@@ -12,10 +13,14 @@ public @interface ParamCheck {
 
     String[] value() default {};
 
-    String errorCode() default  "400154";
+    Class[] classes() default {};
 
-    String msg() default "Bad request parameter";
+    String errorCode() default "400154";
+
+    String msg() default ErrorMessage.PARAM_ERROR;
 
     int httpCode() default 200;
+
+    String[] groups() default {};
 
 }
