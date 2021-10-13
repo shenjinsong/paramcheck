@@ -22,6 +22,7 @@ ParamCheck `<ver.20210915>`版本参数校验使用说明
     * `String msg()` &emsp; 错误提示语  
     * `String[] groups()` &emsp; 分组校验信息【未指定分组时为必校验字段】
     * `String format()` &emsp; 日期格式【未指定时默认为13位时间戳】
+    * `int decimalPlaces()` &emsp; 限制小数位位数
     
    
 ---  
