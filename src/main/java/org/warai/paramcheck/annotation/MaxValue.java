@@ -11,6 +11,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface MaxValue {
+
     int value();
 
     String msg() default ErrorMessage.OVER_MAX_VALUE;
@@ -18,4 +19,6 @@ public @interface MaxValue {
     boolean nullable() default false;
 
     String[] groups() default {};
+
+    int decimalPlaces() default -1;
 }

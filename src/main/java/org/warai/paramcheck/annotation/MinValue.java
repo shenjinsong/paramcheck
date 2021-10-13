@@ -19,4 +19,6 @@ public @interface MinValue {
     boolean nullable() default false;
 
     String[] groups() default {};
+
+    int decimalPlaces() default -1;
 }

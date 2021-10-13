@@ -5,6 +5,8 @@ import org.springframework.util.ObjectUtils;
 import org.warai.paramcheck.annotation.MinValue;
 import org.warai.paramcheck.constant.ErrorMessage;
 
+import java.math.BigDecimal;
+
 
 /**
  * @Auther: わらい
@@ -34,7 +36,13 @@ public class MinValueValidator extends ParamCheckValidator<MinValue> {
             return true;
         }
 
+        BigDecimal number = NumberUtils.createBigDecimal(value.toString());
+        if (annotation.decimalPlaces() != -1 && number.scale() > annotation.decimalPlaces()){
+            super.setFailMsg(ErrorMessage.DIGITAL_DECIMAL_PLACE_MAX);
+            return true;
+        }
+
         super.setFailMsg(annotation.msg());
-        return NumberUtils.createBigDecimal(value.toString()).compareTo(NumberUtils.createBigDecimal(annotation.value() + "")) < 0;
+        return number.compareTo(NumberUtils.createBigDecimal(annotation.value() + "")) < 0;
     }
 }
