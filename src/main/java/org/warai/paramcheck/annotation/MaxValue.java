@@ -12,7 +12,7 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 public @interface MaxValue {
 
-    int value();
+    double value();
 
     String msg() default ErrorMessage.OVER_MAX_VALUE;
 

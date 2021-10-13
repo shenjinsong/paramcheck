@@ -12,7 +12,7 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 public @interface MinValue {
 
-    int value();
+    double value();
 
     String msg() default ErrorMessage.BELOW_MIN_VALUE;
 

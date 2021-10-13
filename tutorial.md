@@ -16,8 +16,8 @@ ParamCheck `<ver.20210915>`版本参数校验使用说明
     * `Class[] classes()` &emsp; 校验的类
     * `String errorCode()` &emsp; 错误码【默认为 400154】
     * `int httpCode()` &emsp; HTTP状态码【默认为 200】
-    * `int min()` &emsp; 最小值&nbsp; /&nbsp; 最大元素个数&nbsp; /&nbsp; 最大字符长度
-    * `int max()` &emsp; 最大值
+    * `int min()` &emsp; 最大元素个数&nbsp; /&nbsp; 最大字符长度
+    * `int max()` &emsp; 最小元素个数&nbsp; /&nbsp; 最小字符长度
     * `boolean nullable()` &emsp; 可为空
     * `String msg()` &emsp; 错误提示语  
     * `String[] groups()` &emsp; 分组校验信息【未指定分组时为必校验字段】

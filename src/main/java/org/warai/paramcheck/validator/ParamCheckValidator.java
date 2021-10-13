@@ -46,7 +46,7 @@ public class ParamCheckValidator<T extends Annotation> {
         // 1、无分组校验（默认需要校验）
         // 2、有分组校验且为同一组
         if (annoGroups.length == 0) {
-            return true;
+            return false;
         }
 
         String[] groups = paramCheck.groups();
