@@ -45,11 +45,12 @@ public class ParamCheckValidator<T extends Annotation> {
     protected boolean needCheck(String[] annoGroups) {
         // 1、无分组校验（默认需要校验）
         // 2、有分组校验且为同一组
-        if (annoGroups.length == 0) {
-            return false;
+        String[] groups = paramCheck.groups();
+        if (groups.length == 0) {
+            return true;
         }
 
-        String[] groups = paramCheck.groups();
+
         List<String> list1 = new ArrayList<>(Arrays.asList(groups));
         List<String> list2 = new ArrayList<>(Arrays.asList(annoGroups));
         list1.retainAll(list2);
