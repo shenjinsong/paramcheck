@@ -1,6 +1,6 @@
 package org.warai.paramcheck.validator;
 
-import org.springframework.util.ObjectUtils;
+import org.warai.paramcheck.util.ObjectUtils;
 import org.warai.paramcheck.annotation.NonNull;
 
 

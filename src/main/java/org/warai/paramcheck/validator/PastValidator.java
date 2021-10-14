@@ -2,7 +2,7 @@ package org.warai.paramcheck.validator;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.springframework.util.ObjectUtils;
+import org.warai.paramcheck.util.ObjectUtils;
 import org.warai.paramcheck.annotation.Past;
 import org.warai.paramcheck.constant.ErrorMessage;
 

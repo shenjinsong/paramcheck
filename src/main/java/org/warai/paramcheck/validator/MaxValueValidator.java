@@ -2,7 +2,7 @@ package org.warai.paramcheck.validator;
 
 
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.util.ObjectUtils;
+import org.warai.paramcheck.util.ObjectUtils;
 import org.warai.paramcheck.annotation.MaxValue;
 import org.warai.paramcheck.constant.ErrorMessage;
 

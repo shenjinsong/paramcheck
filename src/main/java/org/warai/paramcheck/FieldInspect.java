@@ -3,7 +3,7 @@ package org.warai.paramcheck;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.springframework.util.ObjectUtils;
+import org.warai.paramcheck.util.ObjectUtils;
 import org.warai.paramcheck.annotation.InnerObj;
 import org.warai.paramcheck.annotation.ParamCheck;
 import org.warai.paramcheck.constant.Operator;

@@ -2,7 +2,7 @@ package org.warai.paramcheck.validator;
 
 
 import com.alibaba.fastjson.JSONArray;
-import org.springframework.util.ObjectUtils;
+import org.warai.paramcheck.util.ObjectUtils;
 import org.warai.paramcheck.annotation.MaxSize;
 import org.warai.paramcheck.constant.ErrorMessage;
 

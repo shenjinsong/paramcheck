@@ -1,6 +1,6 @@
 package org.warai.paramcheck.validator.chain;
 
-import org.springframework.util.ObjectUtils;
+import org.warai.paramcheck.util.ObjectUtils;
 
 /**
  * @Auther: わらい
