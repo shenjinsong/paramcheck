@@ -21,11 +21,6 @@ public class LengthValidator extends ParamCheckValidator<Length> {
     @Override
     public boolean invalid(Object value) {
 
-        // 分组检验判断
-        if (!super.needCheck(annotation.groups())) {
-            return false;
-        }
-
         // 根据参数做非空判断
         if (ObjectUtils.isEmpty(value)){
             if (annotation.nullable()){

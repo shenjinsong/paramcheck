@@ -23,10 +23,6 @@ public class MaxValueValidator extends ParamCheckValidator<MaxValue> {
     @Override
     public boolean invalid(Object value) {
 
-        if (!super.needCheck(annotation.groups())) {
-            return false;
-        }
-
         // 根据参数做非空判断
         if (ObjectUtils.isEmpty(value)){
             if (annotation.nullable()){

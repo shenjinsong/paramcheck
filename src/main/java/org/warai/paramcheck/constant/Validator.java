@@ -1,11 +1,12 @@
 package org.warai.paramcheck.constant;
 
 import org.springframework.util.Assert;
-import org.warai.paramcheck.annotation.ParamCheck;
+import org.warai.paramcheck.annotation.*;
 import org.warai.paramcheck.validator.*;
-
-
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @Auther: わらい
@@ -13,32 +14,34 @@ import java.lang.annotation.Annotation;
  */
 public enum Validator {
 
-    MaxLength(MaxLengthValidator.class),
-    MaxSize(MaxSizeValidator.class),
-    MaxValue(MaxValueValidator.class),
-    NonNull(NonNullValidator.class),
-    MaxElementLength(MaxElementLengthValidator.class),
-    Past(PastValidator.class),
-    Future(FutureValidator.class),
-    Pattern(PatternValidator.class),
-    Length(LengthValidator.class),
-    ElementLength(ElementLengthValidator.class),
-    MinLength(MinLengthValidator.class),
-    MinValue(MinValueValidator.class),
+    NonNull(NonNull.class, NonNullValidator.class),
+    MaxLength(MaxLength.class, MaxLengthValidator.class),
+    MaxSize(MaxSize.class, MaxSizeValidator.class),
+    MinValue(MinValue.class, MinValueValidator.class),
+    MaxValue(MaxValue.class, MaxValueValidator.class),
+    Length(Length.class, LengthValidator.class),
+    MinLength(MinLength.class, MinLengthValidator.class),
+    Past(Past.class, PastValidator.class),
+    Future(Future.class, FutureValidator.class),
+    ElementLength(ElementLength.class, ElementLengthValidator.class),
+    Pattern(Pattern.class, PatternValidator.class),
+    MaxElementLength(MaxElementLength.class, MaxElementLengthValidator.class),
     ;
 
-    public Class<? extends ParamCheckValidator> cls;
+    public Class<? extends Annotation> annotation;
+    public Class<? extends ParamCheckValidator> validator;
 
-    Validator(Class<? extends ParamCheckValidator> cls) {
-        this.cls = cls;
+    Validator(Class<? extends Annotation> annotation, Class<? extends ParamCheckValidator> validator) {
+        this.annotation = annotation;
+        this.validator = validator;
     }
 
     public static <T extends Annotation> ParamCheckValidator get(ParamCheck paramCheck, T annotation) {
         ParamCheckValidator<T> paramCheckValidator = null;
         for (Validator value : values()) {
-            if (value.name().equals(annotation.annotationType().getSimpleName())) {
+            if (value.annotation.equals(annotation.annotationType())) {
                 try {
-                    paramCheckValidator = value.cls.newInstance().set(paramCheck, annotation);
+                    paramCheckValidator = value.validator.newInstance().set(paramCheck, annotation);
                     break;
                 } catch (Exception ignore) {
                 }
@@ -46,6 +49,15 @@ public enum Validator {
         }
         Assert.notNull(paramCheckValidator, "参数校验 validator 加载失败");
         return paramCheckValidator;
+    }
+
+    public static Map<Class<? extends Annotation>, Method> initGroupsMethod() throws NoSuchMethodException {
+        Map<Class<? extends Annotation>, Method> methods = new HashMap<>();
+        for (Validator value : values()) {
+            Method method = value.annotation.getMethod("groups");
+            methods.put(value.annotation, method);
+        }
+        return methods;
     }
 
 }

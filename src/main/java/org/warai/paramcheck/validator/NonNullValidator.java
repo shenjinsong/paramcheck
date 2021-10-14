@@ -12,11 +12,6 @@ public class NonNullValidator extends ParamCheckValidator<NonNull> {
 
     @Override
     public boolean invalid(Object value) {
-
-        if (!super.needCheck(annotation.groups())) {
-            return false;
-        }
-
         super.setFailMsg(annotation.msg());
         return ObjectUtils.isEmpty(value);
     }

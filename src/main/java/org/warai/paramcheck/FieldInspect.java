@@ -3,18 +3,22 @@ package org.warai.paramcheck;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.warai.paramcheck.util.ObjectUtils;
+import org.springframework.util.Assert;
 import org.warai.paramcheck.annotation.InnerObj;
 import org.warai.paramcheck.annotation.ParamCheck;
 import org.warai.paramcheck.constant.Operator;
 import org.warai.paramcheck.constant.Validator;
+import org.warai.paramcheck.util.ObjectUtils;
 import org.warai.paramcheck.validator.ParamCheckValidator;
 import org.warai.paramcheck.validator.chain.AbstractOperatorValidator;
 
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 
 
@@ -23,16 +27,31 @@ import java.util.regex.Matcher;
  * @Time: 2020/10/16 17:36
  */
 public class FieldInspect {
+    private static Logger log = Logger.getLogger(FieldInspect.class.getName());
+    private static AbstractOperatorValidator operatorValidatorChain = AbstractOperatorValidator.getChainOfOperatorValidator();
+    private static Map<Class<? extends Annotation>, Method> methods;
 
     private Map<String, Set<String>> badFields = new HashMap<>(1);
     private Map<String, List<Annotation>> fieldInfoMap = new HashMap<>(1);
+
     private String SEPARATOR = ".";
     private JSONObject params;
     private ParamCheck paramCheck;
     private String currentKey;
-    private static AbstractOperatorValidator operatorValidatorChain = AbstractOperatorValidator.getChainOfOperatorValidator();
 
-    public FieldInspect(ParamCheck paramCheck, JSONObject params) {
+    static {
+        long l = System.currentTimeMillis();
+        try {
+            methods = Validator.initGroupsMethod();
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException("ParamCheck groups() 方法预缓存失败");
+        }
+        long l1 = System.currentTimeMillis();
+        log.info("*** The ParamCheck Groups() method successfully preloads the cache in " + (l1 - l) + " ms ***");
+
+    }
+
+    public FieldInspect(ParamCheck paramCheck, JSONObject params) throws InvocationTargetException, IllegalAccessException {
         this.params = params;
         this.paramCheck = paramCheck;
         this.getAnnoInfo();
@@ -168,19 +187,40 @@ public class FieldInspect {
 //
 //    }
 
+    private boolean sameGroup(String[] annoGroups) {
+        // 1、无分组校验（默认需要校验）
+        // 2、有分组校验且为同一组
+        String[] groups = paramCheck.groups();
+        if (groups.length == 0 && annoGroups.length == 0) {
+            return true;
+        }
 
-    private Map<String, List<Annotation>> getAnnoInfo(Class cls) {
+        List<String> list1 = new ArrayList<>(Arrays.asList(groups));
+        List<String> list2 = new ArrayList<>(Arrays.asList(annoGroups));
+        list1.retainAll(list2);
+        return list1.size() > 0;
+    }
+
+    private Map<String, List<Annotation>> getAnnoInfo(Class cls) throws InvocationTargetException, IllegalAccessException {
         Map<String, List<Annotation>> map = new HashMap<>();
         Field[] fields = cls.getDeclaredFields();
         for (Field field : fields) {
             List<Annotation> annoList = new ArrayList<>();
             for (Annotation annotation : field.getDeclaredAnnotations()) {
-                if (annotation.annotationType().getPackage().getName().contains(this.getClass().getPackage().getName())) {
+                Class<? extends Annotation> annotationType = annotation.annotationType();
+                if (annotationType.getPackage().getName().contains(this.getClass().getPackage().getName())) {
+
                     if (annotation instanceof InnerObj) {
                         InnerObj innerObj = (InnerObj) annotation;
                         Map<String, List<Annotation>> annoInfo = getAnnoInfo(innerObj.value());
                         annoInfo.keySet().forEach(key -> map.put(field.getName() + SEPARATOR + key, annoInfo.get(key)));
                     } else {
+                        Method method = methods.get(annotationType);
+//                        Assert.notNull(method, annotationType + " groups() 方法不存在");
+                        String [] groups = (String [])method.invoke(annotation);
+                        if (!sameGroup(groups)){
+                            continue;
+                        }
                         annoList.add(annotation);
                     }
                 }
@@ -193,7 +233,7 @@ public class FieldInspect {
     }
 
 
-    private void getAnnoInfo() {
+    private void getAnnoInfo() throws InvocationTargetException, IllegalAccessException {
         // 需要校验的字段和校验注解信息
         for (Class cls : paramCheck.classes()) {
             Map<String, List<Annotation>> map = this.getAnnoInfo(cls);

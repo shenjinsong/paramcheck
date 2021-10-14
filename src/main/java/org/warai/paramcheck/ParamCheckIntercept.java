@@ -74,7 +74,6 @@ public class ParamCheckIntercept extends HandlerInterceptorAdapter {
             return true;
         }
 
-        long l = System.currentTimeMillis();
         Annotation[][] parameterAnnotationArrays = method.getParameterAnnotations();
         // 判断请求参数是否是请求体传过来
         boolean isRequestBody = false;

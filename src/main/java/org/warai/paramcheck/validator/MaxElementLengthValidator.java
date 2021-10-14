@@ -16,11 +16,6 @@ public class MaxElementLengthValidator extends ParamCheckValidator<MaxElementLen
     @Override
     public boolean invalid(Object value) {
 
-        // 分组检验判断，分组值不在当前组中跳过校验流程
-        if (!super.needCheck(annotation.groups())) {
-            return false;
-        }
-
         // 根据参数做非空判断
         if (ObjectUtils.isEmpty(value)){
             if (annotation.nullable()){
