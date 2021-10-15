@@ -106,8 +106,8 @@ public class FieldInspect {
 
     public FieldInspect checkParam() {
         // 注解字段校验
-        log.info("*** 待校验字段： ***");
-        log.info(JSON.toJSONString(fieldInfoMap.keySet(), true));
+        log.info("*** 待校验字段： " + JSON.toJSONString(fieldInfoMap.keySet(), true) + " ***");
+
         for (Map.Entry<String, List<Annotation>> entry : fieldInfoMap.entrySet()) {
             String key = entry.getKey();
             List<Annotation> value = entry.getValue();
@@ -218,8 +218,8 @@ public class FieldInspect {
                     } else {
                         Method method = methods.get(annotationType);
 //                        Assert.notNull(method, annotationType + " groups() 方法不存在");
-                        String [] groups = (String [])method.invoke(annotation);
-                        if (!sameGroup(groups)){
+                        String[] groups = (String[]) method.invoke(annotation);
+                        if (!sameGroup(groups)) {
                             continue;
                         }
                         annoList.add(annotation);
