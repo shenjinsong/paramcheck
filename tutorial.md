@@ -7,7 +7,8 @@ ParamCheck `<ver.20210915>`版本参数校验使用说明
 3、增加分组校验  
 4、增加一些其它的校验规则(注解)  
 5、FieldInspect 类调整  
-6、错误字段信息结果调整  `List<String>` 改为 `Map<String, Set<String>>`，记录具体字段和具体的错误信息
+6、错误字段信息结果调整  `List<String>` 改为 `Map<String, Set<String>>`，记录具体字段和具体的错误信息  
+7、增加`@EnableParamCheck` 用于表示是否启用参数校验功能
 
 
 ---
@@ -104,4 +105,4 @@ ParamCheck `<ver.20210915>`版本参数校验使用说明
 * 注意项
     * 接收参数的对象不包含其父类的校验字段
     * 选择合适的注解能提高校验的效率
-    * 必须重写`ErrorResultHandler.handler()` 方法
+    * 必须实现`ErrorResultHandler.handler()` 方法
