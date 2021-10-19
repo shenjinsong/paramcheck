@@ -17,21 +17,16 @@ import java.util.Set;
  * @Auther: わらい
  * @Time: 2020/9/22 16:26
  */
-public class ErrorResultHandler {
+public interface ErrorResultHandler {
 
-   public void handler(JSONObject params, Map<String, Set<String>> badFields, ParamCheck paramCheck) throws IOException {
-        Map<String, Object> map = new HashMap<>(1);
-        map.put("code", paramCheck.errorCode());
-        map.put("msg", paramCheck.msg());
-        map.put("errors", badFields);
-        this.handler(map, paramCheck.httpCode());
-    }
+    void handler(JSONObject params, Map<String, Set<String>> badFields, ParamCheck paramCheck) throws IOException;
 
-    private void handler(Map responseMsg, int status) throws IOException {
+
+    default void handler(Map responseMsg, int status) throws IOException {
         new ResponseResult(responseMsg,  status).build();
     }
 
-    private class ResponseResult{
+     class ResponseResult{
 
         private Map msg;
         private int status;

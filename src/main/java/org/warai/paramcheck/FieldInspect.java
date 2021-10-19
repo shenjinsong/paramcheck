@@ -106,8 +106,6 @@ public class FieldInspect {
 
     public FieldInspect checkParam() {
         // 注解字段校验
-        log.info("*** 待校验字段： " + JSON.toJSONString(fieldInfoMap.keySet(), true) + " ***");
-
         for (Map.Entry<String, List<Annotation>> entry : fieldInfoMap.entrySet()) {
             String key = entry.getKey();
             List<Annotation> value = entry.getValue();
