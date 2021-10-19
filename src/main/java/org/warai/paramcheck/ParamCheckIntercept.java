@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import org.warai.paramcheck.annotation.ParamCheck;
+
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -98,10 +99,10 @@ public class ParamCheckIntercept extends HandlerInterceptorAdapter {
             jsonObject = JSON.parseObject(jsonStr);
         }
 
-        long l2 = System.currentTimeMillis();
+        long l2 = System.nanoTime();
         FieldInspect fieldInspect = new FieldInspect(paramCheck, jsonObject).checkParam();
-        long l3 = System.currentTimeMillis();
-        log.warning("*** 参数校验耗时：" + (l3 - l2) + " ms ***");
+        long l3 = System.nanoTime();
+        log.warning("*** 参数校验耗时：" + (l3 - l2) / 1000 + " μs ***");
         if (fieldInspect.isInvalid()) {
             errorResultHandler.handler(fieldInspect.getParams(), fieldInspect.getBadFields(), paramCheck);
             return false;
