@@ -36,12 +36,12 @@ public enum Validator {
         this.validator = validator;
     }
 
-    public static <T extends Annotation> ParamCheckValidator get(ParamCheck paramCheck, T annotation) {
+    public static <T extends Annotation> ParamCheckValidator get(T annotation) {
         ParamCheckValidator<T> paramCheckValidator = null;
         for (Validator value : values()) {
             if (value.annotation.equals(annotation.annotationType())) {
                 try {
-                    paramCheckValidator = value.validator.newInstance().set(paramCheck, annotation);
+                    paramCheckValidator = value.validator.newInstance().set(annotation);
                     break;
                 } catch (Exception ignore) {
                 }

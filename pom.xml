@@ -49,6 +49,7 @@
                 <directory>.</directory>
                 <includes>
                     <include>*.md</include>
+                    <include>*.png</include>
                 </includes>
                 <filtering>false</filtering>
             </resource>

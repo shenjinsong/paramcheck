@@ -93,7 +93,7 @@ public class FieldInspect {
             JSONObject jsonObject = json.toJavaObject(JSONObject.class);
             value = jsonObject.get(key);
         }
-        ParamCheckValidator<Annotation> paramCheckValidator = Validator.get(paramCheck, annotation);
+        ParamCheckValidator<Annotation> paramCheckValidator = Validator.get(annotation);
         if (paramCheckValidator.invalid(value)) {
             String desc = paramCheckValidator.getFailMsg() + " | 参数：" + value;
             if (desc.length() > 50) {
