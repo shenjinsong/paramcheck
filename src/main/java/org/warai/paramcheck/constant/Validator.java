@@ -21,6 +21,7 @@ public enum Validator {
     MaxValue(MaxValue.class, MaxValueValidator.class),
     Length(Length.class, LengthValidator.class),
     MinLength(MinLength.class, MinLengthValidator.class),
+    ValueSet(ValueSet.class, ValueSetValidator.class),
     Past(Past.class, PastValidator.class),
     Future(Future.class, FutureValidator.class),
     ElementLength(ElementLength.class, ElementLengthValidator.class),

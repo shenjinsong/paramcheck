@@ -14,8 +14,6 @@ public interface ErrorMessage {
 
     String DIGITAL_DECIMAL_PLACE_MAX = "小数位超出最大位数";
 
-    String ELEMENT_TYPES_NOT_MATCH = "元素类型不符合预期";
-
     String OVER_MAX_LENGTH = "超出最大长度限制";
 
     String BELOW_MIN_LENGTH ="长度不符合预期";
