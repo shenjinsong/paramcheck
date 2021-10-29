@@ -1,4 +1,4 @@
-ParamCheck `<ver.20211028>`版本参数校验使用说明
+ParamCheck 参数校验使用说明
 --
 
 * **_主要调整：_**  
@@ -25,6 +25,7 @@ ParamCheck `<ver.20211028>`版本参数校验使用说明
     * `String format()` &emsp; 日期格式【未指定时默认为13位时间戳】
     * `int decimalPlaces()` &emsp; 限制小数位位数
     
+    ######  注意：如果 @ParamCheck 中 groups 未指定则校验所有加了注解的字段  
    
 ---  
 
