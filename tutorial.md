@@ -1,28 +1,6 @@
 ParamCheck 参数校验使用说明
 ***
 
-* **_主要调整：_**  
-1、移除校验中的元素递归校验  
-2、增加使用注解对对象字段的校验  
-3、增加分组校验  
-4、增加一些其它的校验规则(注解)  
-5、FieldInspect 类调整  
-6、错误字段信息结果调整  `List<String>` 改为 `Map<String, Set<String>>`，记录具体字段和具体的错误信息  
-7、增加`@EnableParamCheck` 用于表示是否启用参数校验功能  
-
-***
-
-*  FieldInspect 类调整说明
-    * 新增 `Map<String, List<String>> badFields` 字段记录字段的错误信息，key为字段名称，value为错误信息的集合
-    * `JSONObject params` 为传入所有参数；
-    * `ParamCheck paramCheck` 校验的入口，可以获取校验时的自定义信息
-    * 通过重写`ErrorResultHandler.handler(JSONObject params, Map<String, Set<String>> badFields, ParamCheck paramCheck)` 自定义返回错误信息  
-        * `Map<String, Set<String>>` 结构说明：key 具体字段名，包含对象名；
-        * `Set<String>` 是错误信息
-     
-
-*****
-
 
 
 * 注解使用时的可选参数说明：  

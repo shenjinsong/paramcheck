@@ -3,7 +3,6 @@ package org.warai.paramcheck;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.springframework.util.Assert;
 import org.warai.paramcheck.annotation.InnerObj;
 import org.warai.paramcheck.annotation.ParamCheck;
 import org.warai.paramcheck.constant.Operator;
@@ -162,29 +161,27 @@ public class FieldInspect {
         }
     }
 
-    private boolean containErrorValue(Object obj) {
+    private boolean containErrorValue(Object obj){
         return containErrorValue(obj, null, null);
     }
 
-
-    private boolean containErrorValue(Object param, String value, String operStr) {
-        return !operatorValidatorChain.inspectPass(param, value, operStr);
+    private boolean containErrorValue(Object param, String value, String operStr){
+        if (param instanceof JSONArray) {
+            JSONArray jsonArray = (JSONArray) param;
+            if(jsonArray.isEmpty()){
+                return true;
+            }
+            for (Object o : jsonArray) {
+                if (containErrorValue(o, value, operStr)) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return !operatorValidatorChain.inspectPass(param, value, operStr);
+        }
 
     }
-//    private boolean containErrorValue(Object param, String value, String operStr) throws BadStringOperationException {
-//        if (param instanceof JSONArray) {
-//            JSONArray jsonArray = (JSONArray) param;
-//            for (Object o : jsonArray) {
-//                if (containErrorValue(o, value, operStr)) {
-//                    return true;
-//                }
-//            }
-//            return false;
-//        } else {
-//            return !operatorValidatorChain.inspectPass(param, value, operStr);
-//        }
-//
-//    }
 
     private boolean sameGroup(String[] annoGroups) {
         // 1、无分组校验（默认需要校验）
