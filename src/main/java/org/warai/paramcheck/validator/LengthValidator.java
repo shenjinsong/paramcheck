@@ -13,7 +13,7 @@ import org.warai.paramcheck.constant.ErrorMessage;
  *
  * 作用范围：
  * 1、校验字符串长度范围
- * 2、校验数组元素个数范围
+ * 2、校验数组元素长度范围
  */
 public class LengthValidator extends ParamCheckValidator<Length> {
 
@@ -35,8 +35,7 @@ public class LengthValidator extends ParamCheckValidator<Length> {
         super.setFailMsg(annotation.msg());
         if (value instanceof JSONArray) {
             JSONArray jsonArray = (JSONArray) value;
-            int size = jsonArray.size();
-            return size >= annotation.min() && size <= annotation.max();
+            return jsonArray.stream().anyMatch(arr -> arr.toString().length() < annotation.min() || arr.toString().length() > annotation.max());
         }
 
         int length = value.toString().length();

@@ -1,5 +1,6 @@
 package org.warai.paramcheck.validator;
 
+import com.alibaba.fastjson.JSONArray;
 import org.warai.paramcheck.annotation.ValueSet;
 import org.warai.paramcheck.constant.ErrorMessage;
 import org.warai.paramcheck.util.ObjectUtils;
@@ -25,6 +26,9 @@ public class ValueSetValidator  extends ParamCheckValidator<ValueSet>{
             }
         }
         super.setFailMsg(ErrorMessage.PARAM_ERROR);
+        if (value instanceof JSONArray){
+            return ((JSONArray) value).stream().anyMatch(val -> Arrays.stream(annotation.value()).noneMatch(s -> s.equals(val.toString())));
+        }
         return Arrays.stream(annotation.value()).noneMatch(s -> s.equals(value.toString()));
     }
 }

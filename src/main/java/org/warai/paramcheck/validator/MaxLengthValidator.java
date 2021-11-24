@@ -33,7 +33,7 @@ public class MaxLengthValidator extends ParamCheckValidator<MaxLength> {
         super.setFailMsg(annotation.msg());
         // 数组校验长度
         if (value instanceof JSONArray) {
-            return ((JSONArray) value).size() > annotation.value();
+            return ((JSONArray) value).stream().anyMatch(arr -> arr.toString().length() > annotation.value());
         }
 
         // 字符串校验长度

@@ -3,8 +3,7 @@ package org.warai.paramcheck.util;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Array;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Auther: わらい
@@ -16,11 +15,11 @@ public abstract class ObjectUtils {
         if (obj == null) {
             return true;
         } else if (obj.getClass().isArray()) {
-            return Array.getLength(obj) == 0;
+            return Array.getLength(obj) == 0 || Arrays.stream((Object[]) obj).anyMatch(ObjectUtils::isEmpty);
         } else if (obj instanceof CharSequence) {
-            return StringUtils.isBlank((CharSequence)obj);
+            return StringUtils.isBlank((CharSequence) obj);
         } else if (obj instanceof Collection) {
-            return ((Collection)obj).isEmpty();
+            return ((Collection) obj).isEmpty() || ((Collection) obj).stream().anyMatch(ObjectUtils::isEmpty);
         } else {
             return obj instanceof Map && ((Map) obj).isEmpty();
         }

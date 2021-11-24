@@ -1,5 +1,6 @@
 package org.warai.paramcheck.validator;
 
+import com.alibaba.fastjson.JSONArray;
 import org.warai.paramcheck.util.ObjectUtils;
 import org.warai.paramcheck.annotation.Pattern;
 import org.warai.paramcheck.constant.ErrorMessage;
@@ -31,8 +32,11 @@ public class PatternValidator extends ParamCheckValidator<Pattern>{
                 return true;
             }
         }
-
         super.setFailMsg(ErrorMessage.FORMAT_NOT_MATCH);
+        if(value instanceof JSONArray){
+            return ((JSONArray) value).stream().anyMatch(val -> !matches(annotation.value(), val.toString()));
+        }
+
         return !matches(annotation.value(), value.toString());
     }
 }

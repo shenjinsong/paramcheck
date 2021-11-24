@@ -1,6 +1,7 @@
 package org.warai.paramcheck.validator;
 
 
+import com.alibaba.fastjson.JSONArray;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.warai.paramcheck.util.ObjectUtils;
 import org.warai.paramcheck.annotation.MaxValue;
@@ -33,6 +34,15 @@ public class MaxValueValidator extends ParamCheckValidator<MaxValue> {
             }
         }
 
+        if (value instanceof JSONArray) {
+            return ((JSONArray) value).stream().anyMatch(this::numberCheck);
+        }
+
+       return numberCheck(value);
+    }
+
+    public boolean numberCheck(Object value){
+
         if (!NumberUtils.isCreatable(value.toString())) {
             super.setFailMsg(ErrorMessage.FIELD_TYPES_NOT_MATCH);
             return true;
@@ -43,7 +53,6 @@ public class MaxValueValidator extends ParamCheckValidator<MaxValue> {
             super.setFailMsg(ErrorMessage.DIGITAL_DECIMAL_PLACE_MAX);
             return true;
         }
-
         super.setFailMsg(annotation.msg());
         return number.compareTo(NumberUtils.createBigDecimal(annotation.value() + "")) > 0;
     }

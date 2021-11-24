@@ -25,9 +25,9 @@ public class MinLengthValidator extends ParamCheckValidator<MinLength>{
             }
         }
         super.setFailMsg(annotation.msg());
-        // 数组校验长度
+        // 数组校验元素长度
         if (value instanceof JSONArray) {
-            return ((JSONArray) value).size() < annotation.value();
+            return ((JSONArray) value).stream().anyMatch(val -> val.toString().length() < annotation.value());
         }
 
         // 字符串校验长度

@@ -1,5 +1,6 @@
 package org.warai.paramcheck.validator;
 
+
 import java.lang.annotation.Annotation;
 
 
@@ -28,6 +29,9 @@ public class ParamCheckValidator<T extends Annotation> {
         return true;
     }
 
+    public boolean numberCheck(Object value){
+        return false;
+    }
 
     public ParamCheckValidator<T> set(T annotation) {
         this.annotation = annotation;
