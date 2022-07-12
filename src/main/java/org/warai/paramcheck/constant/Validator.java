@@ -27,6 +27,7 @@ public enum Validator {
     ElementLength(ElementLength.class, ElementLengthValidator.class),
     Pattern(Pattern.class, PatternValidator.class),
     MaxElementLength(MaxElementLength.class, MaxElementLengthValidator.class),
+    Numeric(Numeric.class, NumericValidator.class),
     ;
 
     public Class<? extends Annotation> annotation;
